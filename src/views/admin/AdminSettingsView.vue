@@ -56,7 +56,7 @@ auth.init()
       </v-card-text>
     </v-card>
 
-    <v-card rounded="xl" elevation="1">
+    <v-card rounded="xl" elevation="1" class="mb-4">
       <v-card-title class="font-weight-bold d-flex align-center">
         <v-icon icon="mdi-percent" class="mr-2" color="warning" />
         Descuentos
@@ -71,6 +71,27 @@ auth.init()
         />
         <p class="text-body-2 text-grey-darken-1 mt-3 mb-0">
           Muestra el campo de descuento porcentual en el diálogo de cobro.
+        </p>
+      </v-card-text>
+    </v-card>
+
+    <v-card rounded="xl" elevation="1" class="mb-4">
+      <v-card-title class="font-weight-bold d-flex align-center">
+        <v-icon icon="mdi-timer-outline" class="mr-2" color="teal" />
+        Turnos de meseros
+      </v-card-title>
+      <v-card-text>
+        <v-switch
+          :model-value="settings.settings.shiftsEnabled"
+          color="success"
+          hide-details
+          label="Usar turnos de meseros desde la app"
+          @update:model-value="settings.update({ shiftsEnabled: !!$event })"
+        />
+        <p class="text-body-2 text-grey-darken-1 mt-3 mb-0">
+          Al activarlo, los meseros inician y finalizan su turno desde su vista de mesas y el admin ve
+          los cortes de caja por turno en <strong>Ventas</strong>. Al desactivarlo, el control de turnos
+          se hace fuera de la app: se ocultan los botones de turno y la sección de cortes de caja.
         </p>
       </v-card-text>
     </v-card>

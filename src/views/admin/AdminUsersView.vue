@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { ROLES } from '../../types'
-import type { Role } from '../../types'
+import type { Role, StaffUser } from '../../types'
 
 const auth = useAuthStore()
 auth.init()
@@ -10,7 +10,14 @@ auth.init()
 const COLOR_OPTIONS = ['primary', 'secondary', 'success', 'info', 'warning', 'error', 'orange', 'teal', 'accent']
 
 const dialog = ref(false)
-const form = ref({ id: null as string | null, name: '', role: 'waiter' as Role, color: 'success' })
+const form = ref({
+  id: null as string | null,
+  name: '',
+  role: 'waiter' as Role,
+  color: 'success',
+  password: '',
+  removePassword: false,
+})
 const showSnack = ref(false)
 const snackText = ref('')
 
@@ -25,12 +32,28 @@ function initials(name: string): string {
     .toUpperCase()
 }
 
-function openDialog(user?: { id: string; name: string; role: Role; color: string }) {
+const hasPassword = computed(() => {
+  if (!form.value.id) return false
+  return !!auth.users.find((u) => u.id === form.value.id)?.password
+})
+
+const passwordHint = computed(() => {
+  if (form.value.id) {
+    return hasPassword.value
+      ? 'Deja vacío para mantener la contraseña actual.'
+      : 'Opcional: si la dejas vacía, el perfil entra sin contraseña.'
+  }
+  return 'Opcional: se pedirá al entrar a este perfil.'
+})
+
+function openDialog(user?: StaffUser) {
   form.value = {
     id: user?.id ?? null,
     name: user?.name ?? '',
     role: user?.role ?? 'waiter',
     color: user?.color ?? 'success',
+    password: '',
+    removePassword: false,
   }
   dialog.value = true
 }
@@ -39,9 +62,17 @@ function save() {
   const name = form.value.name.trim()
   if (!name) return
   if (form.value.id) {
-    auth.updateUser(form.value.id, { name, role: form.value.role, color: form.value.color })
+    const patch: Partial<StaffUser> = { name, role: form.value.role, color: form.value.color }
+    if (form.value.removePassword) patch.password = ''
+    else if (form.value.password) patch.password = form.value.password
+    auth.updateUser(form.value.id, patch)
   } else {
-    auth.addUser({ name, role: form.value.role, color: form.value.color })
+    auth.addUser({
+      name,
+      role: form.value.role,
+      color: form.value.color,
+      ...(form.value.password ? { password: form.value.password } : {}),
+    })
   }
   dialog.value = false
 }
@@ -96,11 +127,19 @@ function roleLabel(role: Role): string {
               Tú
             </v-chip>
           </v-list-item-title>
-          <v-list-item-subtitle>
+          <v-list-item-subtitle class="d-flex align-center">
             <v-chip size="small" :color="ROLES[u.role].color" variant="tonal">
               <v-icon :icon="ROLES[u.role].icon" size="14" start />
               {{ roleLabel(u.role) }}
             </v-chip>
+            <v-icon
+              v-if="u.password"
+              icon="mdi-lock"
+              size="14"
+              color="grey"
+              class="ml-2"
+              title="Perfil protegido con contraseña"
+            />
           </v-list-item-subtitle>
           <template #append>
             <v-switch
@@ -152,6 +191,25 @@ function roleLabel(role: Role): string {
               <v-avatar :color="c" size="20" />
             </v-btn>
           </v-btn-toggle>
+
+          <v-divider class="my-4" />
+
+          <v-text-field
+            v-model="form.password"
+            type="password"
+            label="Contraseña del perfil"
+            placeholder="Opcional"
+            :hint="passwordHint"
+            persistent-hint
+            autocomplete="new-password"
+          />
+          <v-checkbox
+            v-if="form.id && hasPassword"
+            v-model="form.removePassword"
+            label="Quitar contraseña actual"
+            color="error"
+            hide-details
+          />
         </v-card-text>
         <v-card-actions class="pa-4">
           <v-btn size="x-large" variant="text" @click="dialog = false">Cancelar</v-btn>

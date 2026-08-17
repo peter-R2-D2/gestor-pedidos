@@ -29,9 +29,10 @@ El servidor escucha en `0.0.0.0`, así que desde una tablet en la misma red pued
 - Cada mesa ocupada muestra **quién la atiende** (el mesero que la abrió).
 - **Cancelar/liberar mesa** solo está permitido si no hay productos **en preparación** (para no descartar lo que ya cocina el equipo).
 - **Trasladar mesa**: mueve el pedido completo a otra mesa disponible (el cliente se cambió de lugar).
-- **Turnos**: los meseros inician/finalizan su turno y ven su corte de caja (cuentas, efectivo/tarjeta, total). El admin ve todos los cortes en **Ventas**.
+- **Turnos**: los meseros inician/finalizan su turno y ven su corte de caja (cuentas, efectivo/tarjeta, total). El admin ve todos los cortes en **Ventas**. Los turnos son opcionales: si el control se hace fuera de la app, se desactivan desde **Ajustes** y se ocultan los botones de turno y la sección de cortes.
 - Al cerrar una cuenta se muestra un **ticket imprimible** con el desglose (subtotal, descuento, propina, total) y el nombre del mesero.
-- En **Ajustes** (admin) puedes activar/desactivar: exigir responsable por mesa (solo ese mesero o un admin puede modificar la mesa), propinas y descuentos al cerrar cuenta.
+- En **Ajustes** (admin) puedes activar/desactivar: exigir responsable por mesa (solo ese mesero o un admin puede modificar la mesa), propinas, descuentos al cerrar cuenta y turnos de meseros.
+- Cada perfil puede tener una **contraseña opcional** (Usuarios): si se asigna, se pide al entrar y evita que otra persona use ese perfil en la tablet. Sin contraseña, el perfil entra directo.
 - Al primer arranque se crean datos de demostración (usuarios, menú, 8 mesas y pedidos de ejemplo).
 - Desde el panel del admin (Panel → *Restablecer demo*) puedes volver a los datos de ejemplo.
 - ⚠️ La información vive en el navegador de cada dispositivo: **no se comparte entre tablets**. Para eso está la migración a la nube (abajo).

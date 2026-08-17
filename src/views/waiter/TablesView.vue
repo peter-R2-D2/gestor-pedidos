@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useTablesStore } from '../../stores/tables'
 import { useAuthStore } from '../../stores/auth'
 import { useShiftsStore } from '../../stores/shifts'
+import { useSettingsStore } from '../../stores/settings'
 import { orderTotal } from '../../types'
 import { formatClock, formatDateTime, formatMoney, timeAgoLabel } from '../../utils/format'
 import { shiftSummary } from '../../utils/shifts'
@@ -12,10 +13,14 @@ const router = useRouter()
 const tables = useTablesStore()
 const auth = useAuthStore()
 const shifts = useShiftsStore()
+const settings = useSettingsStore()
 
 tables.init()
 auth.init()
 shifts.init()
+settings.init()
+
+const shiftsEnabled = computed(() => settings.settings.shiftsEnabled)
 
 const currentUser = computed(() => auth.currentUser)
 const activeShift = computed(() => (currentUser.value ? shifts.activeShiftFor(currentUser.value.id) : null))
@@ -76,28 +81,30 @@ const corteDialog = ref(false)
         </span>
       </div>
       <div class="d-flex align-center ga-2 flex-wrap">
-        <v-chip v-if="activeShift" variant="tonal" color="teal" size="large">
-          <v-icon icon="mdi-timer-play" start />
-          Turno desde {{ formatClock(activeShift.startedAt) }}
-        </v-chip>
-        <v-btn
-          v-if="!activeShift"
-          color="success"
-          prepend-icon="mdi-timer-play"
-          size="x-large"
-          @click="startShift"
-        >
-          Iniciar turno
-        </v-btn>
-        <v-btn
-          v-else
-          color="error"
-          prepend-icon="mdi-timer-off"
-          size="x-large"
-          @click="corteDialog = true"
-        >
-          Finalizar turno
-        </v-btn>
+        <template v-if="shiftsEnabled">
+          <v-chip v-if="activeShift" variant="tonal" color="teal" size="large">
+            <v-icon icon="mdi-timer-play" start />
+            Turno desde {{ formatClock(activeShift.startedAt) }}
+          </v-chip>
+          <v-btn
+            v-if="!activeShift"
+            color="success"
+            prepend-icon="mdi-timer-play"
+            size="large"
+            @click="startShift"
+          >
+            Iniciar turno
+          </v-btn>
+          <v-btn
+            v-else
+            color="error"
+            prepend-icon="mdi-timer-off"
+            size="large"
+            @click="corteDialog = true"
+          >
+            Finalizar turno
+          </v-btn>
+        </template>
         <v-chip variant="tonal" color="primary" size="large">
           <v-icon icon="mdi-account-tie" start />
           {{ currentUser?.name ?? 'Mesero' }}
@@ -142,10 +149,24 @@ const corteDialog = ref(false)
             </div>
           </div>
         </v-card-text>
-        <v-card-actions class="pa-4">
-          <v-btn size="x-large" variant="text" @click="corteDialog = false">Seguir trabajando</v-btn>
-          <v-spacer />
-          <v-btn size="x-large" color="error" prepend-icon="mdi-timer-off" @click="finishShift">
+        <v-divider class="mx-4" />
+        <v-card-actions class="pa-4 d-flex ga-3">
+          <v-btn
+            size="large"
+            variant="tonal"
+            prepend-icon="mdi-backup-restore"
+            class="flex-grow-1"
+            @click="corteDialog = false"
+          >
+            Seguir trabajando
+          </v-btn>
+          <v-btn
+            size="large"
+            color="error"
+            prepend-icon="mdi-timer-off"
+            class="flex-grow-1"
+            @click="finishShift"
+          >
             Finalizar turno
           </v-btn>
         </v-card-actions>
@@ -172,7 +193,7 @@ const corteDialog = ref(false)
           class="table-card pa-2"
           @click="openTable(card.table.id)"
         >
-          <v-card-text class="d-flex flex-column align-center text-center">
+          <v-card-text class="d-flex flex-column align-center text-center flex-grow-1">
             <v-icon
               :icon="card.table.status === 'occupied' ? 'mdi-table-chair' : 'mdi-table'"
               size="40"
@@ -190,7 +211,7 @@ const corteDialog = ref(false)
               {{ card.table.status === 'occupied' ? 'Ocupada' : 'Disponible' }}
             </v-chip>
 
-            <div v-if="card.order" class="mt-3 w-100 text-grey-darken-1">
+            <div v-if="card.order" class="mt-auto pt-3 w-100 text-grey-darken-1">
               <div class="text-body-2 font-weight-bold text-grey-darken-2">
                 {{ card.itemCount }} productos · {{ formatMoney(card.total) }}
               </div>
@@ -222,7 +243,7 @@ const corteDialog = ref(false)
 .table-card {
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
-  min-height: 230px;
+  height: 300px;
 }
 .table-card:hover {
   transform: translateY(-2px);

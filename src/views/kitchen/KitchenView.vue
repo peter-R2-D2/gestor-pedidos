@@ -41,18 +41,6 @@ const boards = computed<Board[]>(() =>
   }),
 )
 
-const counts = computed(() => {
-  const c = { pending: 0, preparing: 0, ready: 0 }
-  for (const b of boards.value) {
-    for (const i of b.items) {
-      if (i.status === 'pending') c.pending += i.qty
-      else if (i.status === 'preparing') c.preparing += i.qty
-      else if (i.status === 'ready') c.ready += i.qty
-    }
-  }
-  return c
-})
-
 interface NextAction {
   to: ItemStatus
   label: string
@@ -73,25 +61,12 @@ function advance(orderId: string, itemId: string, status: ItemStatus) {
 
 <template>
   <div class="pa-4">
-    <div class="d-flex align-center justify-space-between mb-4 flex-wrap">
-      <div>
-        <h2 class="text-h5 font-weight-bold">Cocina</h2>
-        <span class="text-body-2 text-grey-darken-1">
-          {{ auth.currentUser?.name ?? 'Cocina' }} · {{ boards.length }}
-          {{ boards.length === 1 ? 'mesa con pedido' : 'mesas con pedido' }}
-        </span>
-      </div>
-      <div class="d-flex ga-2">
-        <v-chip variant="tonal" color="warning" size="large">
-          <v-icon icon="mdi-clock-outline" start /> Pendientes: {{ counts.pending }}
-        </v-chip>
-        <v-chip variant="tonal" color="orange" size="large">
-          <v-icon icon="mdi-fire" start /> Preparando: {{ counts.preparing }}
-        </v-chip>
-        <v-chip variant="tonal" color="info" size="large">
-          <v-icon icon="mdi-food-takeout-box" start /> Listos: {{ counts.ready }}
-        </v-chip>
-      </div>
+    <div class="mb-4">
+      <h2 class="text-h5 font-weight-bold">Cocina</h2>
+      <span class="text-body-2 text-grey-darken-1">
+        {{ auth.currentUser?.name ?? 'Cocina' }} · {{ boards.length }}
+        {{ boards.length === 1 ? 'mesa con pedido' : 'mesas con pedido' }}
+      </span>
     </div>
 
     <v-row v-if="boards.length" dense>
@@ -125,7 +100,8 @@ function advance(orderId: string, itemId: string, status: ItemStatus) {
                   </v-chip>
                 </div>
                 <v-btn
-                  size="x-large"
+                  size="small"
+                  density="comfortable"
                   :color="nextAction(item.status).color"
                   class="ml-2"
                   @click="advance(b.orderId, item.id, nextAction(item.status).to)"

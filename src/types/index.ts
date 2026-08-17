@@ -16,6 +16,9 @@ export interface StaffUser {
   role: Role
   color: string
   active: boolean
+  // Contraseña opcional del perfil (se pide al entrar).
+  // Ausente/vacía = el perfil entra sin contraseña.
+  password?: string
 }
 
 export interface Category {
@@ -125,12 +128,18 @@ export interface AppSettings {
   responsiblePerTable: boolean
   tipsEnabled: boolean
   discountsEnabled: boolean
+  // Si está activo, los meseros inician/finalizan turno desde la app
+  // y se registran cortes de caja por turno. Si está desactivado,
+  // el control de turnos se hace fuera de la app y no se muestra
+  // esa interfaz en las vistas de mesero ni en el corte de caja.
+  shiftsEnabled: boolean
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
   responsiblePerTable: false,
   tipsEnabled: true,
   discountsEnabled: true,
+  shiftsEnabled: true,
 }
 
 // Base de datos completa persistida en localStorage

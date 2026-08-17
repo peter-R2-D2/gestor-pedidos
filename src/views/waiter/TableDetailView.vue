@@ -220,6 +220,8 @@ const receiptShow = ref(false)
 
 function confirmClose() {
   if (!order.value) return
+  // No se puede cobrar hasta que todos los productos estén entregados
+  if (undelivered.value > 0) return
   tables.closeOrder(order.value.id, payment.value, auth.currentUser?.id, {
     subtotal: subtotal.value,
     discount: discountAmount.value,
@@ -463,6 +465,7 @@ onBeforeRouteLeave(() => {
           <div v-if="undelivered > 0" class="mb-3">
             <v-alert type="warning" variant="tonal" density="compact">
               Faltan {{ undelivered }} {{ undelivered === 1 ? 'producto por entregar' : 'productos por entregar' }}.
+              Para cerrar la cuenta, todos los productos deben estar <strong>entregados</strong>.
             </v-alert>
           </div>
 
@@ -516,7 +519,18 @@ onBeforeRouteLeave(() => {
         <v-card-actions class="pa-4">
           <v-btn size="x-large" variant="text" @click="closeDialog = false">Cancelar</v-btn>
           <v-spacer />
-          <v-btn size="x-large" color="success" prepend-icon="mdi-cash-check" @click="confirmClose">
+          <v-tooltip
+            v-if="undelivered > 0"
+            text="Para cerrar la cuenta, todos los productos deben estar entregados"
+            location="top"
+          >
+            <template #activator="{ props }">
+              <v-btn v-bind="props" size="x-large" color="success" prepend-icon="mdi-cash-check" disabled>
+                Cobrar y cerrar
+              </v-btn>
+            </template>
+          </v-tooltip>
+          <v-btn v-else size="x-large" color="success" prepend-icon="mdi-cash-check" @click="confirmClose">
             Cobrar y cerrar
           </v-btn>
         </v-card-actions>

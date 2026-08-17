@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useTablesStore } from '../../stores/tables'
 import { useAuthStore } from '../../stores/auth'
 import { useShiftsStore } from '../../stores/shifts'
+import { useSettingsStore } from '../../stores/settings'
 import { PAYMENT_METHODS, orderGrandTotal, orderTotal } from '../../types'
 import { formatDateTime, formatMoney } from '../../utils/format'
 import { shiftSummary } from '../../utils/shifts'
@@ -10,8 +11,10 @@ import { shiftSummary } from '../../utils/shifts'
 const tables = useTablesStore()
 const auth = useAuthStore()
 const shifts = useShiftsStore()
+const settings = useSettingsStore()
 tables.init()
 shifts.init()
+settings.init()
 
 type Period = 'today' | '7d' | 'all'
 const period = ref<Period>('today')
@@ -153,7 +156,7 @@ function initials(name: string): string {
       </v-data-table>
     </v-card>
 
-    <v-card rounded="xl" elevation="1" class="mt-4">
+    <v-card v-if="settings.settings.shiftsEnabled" rounded="xl" elevation="1" class="mt-4">
       <v-card-title class="font-weight-bold d-flex align-center">
         <v-icon icon="mdi-clipboard-arrow-right" class="mr-2" color="primary" />
         Cortes de caja por mesero
@@ -189,5 +192,10 @@ function initials(name: string): string {
         Aún no hay turnos registrados. Los meseros inician su turno desde su vista de mesas.
       </v-card-text>
     </v-card>
+
+    <v-alert v-else type="info" variant="tonal" class="mt-4">
+      Los turnos de meseros están desactivados en <strong>Ajustes</strong>, así que no se registran
+      cortes de caja por turno. Si los activas, aquí aparecerán los cortes de cada mesero.
+    </v-alert>
   </div>
 </template>
